@@ -14,10 +14,10 @@ def residual_block(input_tensor):
 	''' 
 
 	conv_1_1 = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
-					  padding='valid', name='residual_1')(input_tensor)
+					  padding='same', name='residual_1')(input_tensor)
 
 	conv_1_2 = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
-					  padding='valid', name='residual_2')(conv_1_1)
+					  padding='same', name='residual_2')(conv_1_1)
 
 	sum_tensor = merge([input_tensor, conv_1_2], mode='sum', name='residual_summation')
 
@@ -38,7 +38,7 @@ def generator(generator_type):
 
 	input_layer = Input(shape(32,32,1),name='LowResInput')
 	conv_1 = Conv2D(filters=64, kernel_size=(7, 7), strides=(1, 1),
-					padding='valid', name='first_conv')(input_layer)
+					padding='same', name='first_conv')(input_layer)
 	
 	'''
 	For G3, the kernel size and the stride is (4, 4) and (2, 2)
@@ -57,9 +57,9 @@ def generator(generator_type):
 
 	
 	conv_2 = Conv2D(filters=64, kernel_size=(k, k), strides=(s, s),
-					padding='valid', name='second_conv')(conv_1)
+					padding='same', name='second_conv')(conv_1)
 	conv_3 = Conv2D(filters=64, kernel_size=(k, k), strides=(s, s),
-					padding='valid', name='third_conv')(conv_2)
+					padding='same', name='third_conv')(conv_2)
 
 	input_tensor = conv_3
 	
@@ -74,13 +74,13 @@ def generator(generator_type):
 		input_tensor = residual_output
 
 	conv_4 = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
-					padding='valid', name='fourth_conv')(residual_output)	
+					padding='same', name='fourth_conv')(residual_output)	
 
 	conv_5 = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
-					padding='valid', name='fifth_conv')(conv_4)
+					padding='same', name='fifth_conv')(conv_4)
 
 	output_generator = Conv2D(filters=3, kernel_size=(7, 7), strides=(1, 1),
-							  padding='valid', name='generator_output')(conv_5)
+							  padding='same', name='generator_output')(conv_5)
 
 	model = Model(inputs=input_layer, outputs=output_generator)
 	
