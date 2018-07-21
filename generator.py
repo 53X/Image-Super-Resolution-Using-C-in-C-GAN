@@ -1,5 +1,6 @@
 import keras
 from keras.layers import Conv2D, Input, merge
+from keras.model import Model
 
 def residual_block(input_tensor):
 
@@ -17,19 +18,10 @@ def residual_block(input_tensor):
 
 	conv_1_2 = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
 					  padding='valid', name='residual_2')(conv_1_1)
-					  				  
 
+	sum_tensor = merge([input_tensor, conv_1_2], mode='sum', name='residual_summation')
 
-
-
-
-
-
-
-
-
-
-
+	return sum_tensor				  
 
 
 
@@ -48,6 +40,13 @@ def generator(generator_type):
 	conv_1 = Conv2D(filters=64, kernel_size=(7, 7), strides=(1, 1),
 					padding='valid', name='first_conv')(input_layer)
 	
+	'''
+	For G3, the kernel size and the stride is (4, 4) and (2, 2)
+	respectively. For G1 and G2, the kernel size and the stride
+	is (3, 3) and (1, 1)
+
+	'''
+
 	if(generator_type==3):
 
 		k, s = 4, 2
@@ -60,7 +59,39 @@ def generator(generator_type):
 	conv_2 = Conv2D(filters=64, kernel_size=(k, k), strides=(s, s),
 					padding='valid', name='second_conv')(conv_1)
 	conv_3 = Conv2D(filters=64, kernel_size=(k, k), strides=(s, s),
-					padding='valid', name='first_conv')(conv_2)
+					padding='valid', name='third_conv')(conv_2)
+
+	input_tensor = conv_3
+	
+	'''
+	Residual blocks added for 6 consecutive times
+
+	''' 
+
+	for i in range(6):
+
+		residual_output = residual_block(input_tensor)
+		input_tensor = residual_output
+
+	conv_4 = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
+					padding='valid', name='fourth_conv')(residual_output)	
+
+	conv_5 = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
+					padding='valid', name='fifth_conv')(conv_4)
+
+	output_generator = Conv2D(filters=3, kernel_size=(7, 7), strides=(1, 1),
+							  padding='valid', name='generator_output')(conv_5)
+
+	model = Model(inputs=input_layer, outputs=output_generator)
+	
+	return model						  
+
+
+
+
+
+
+
 
 
 
